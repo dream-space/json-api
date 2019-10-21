@@ -8,7 +8,6 @@ Tested up to: 5.2.2
 Stable tag: 2.0.0
 
 A RESTful API for WordPress
-
 == Description ==
 
 JSON API allows you to retrieve and manipulate WordPress content using HTTP requests. There are three main goals:
