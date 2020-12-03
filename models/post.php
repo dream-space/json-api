@@ -236,25 +236,29 @@ class JSON_API_Post {
 
     function set_thumbnail_value() {
         global $json_api;
-        if (!$json_api->include_value('thumbnail') ||
-            !function_exists('get_post_thumbnail_id')) {
-            unset($this->thumbnail);
-            return;
+        $this->thumbnail = null;
+        $attachment = null;
+        $this->thumbnail_images = null;
+        $attachment_id = function_exists('get_post_thumbnail_id') ? get_post_thumbnail_id($this->id) : 0;
+        if ($attachment_id != 0) {
+            $attachment = $json_api->introspector->get_attachment($attachment_id);
+        } else {
+            $attachment = $json_api->introspector->get_attachments($this->id)[0];
         }
-        $attachment_id = get_post_thumbnail_id($this->id);
-        if (!$attachment_id) {
-            unset($this->thumbnail);
-            return;
-        }
+
         $thumbnail_size = $this->get_thumbnail_size();
         $this->thumbnail_size = $thumbnail_size;
-        $attachment = $json_api->introspector->get_attachment($attachment_id);
-        $image = $attachment->images[$thumbnail_size];
-        $this->thumbnail = $image->url;
-        $this->thumbnail_images = null;
+
         if($attachment->images != null && count($attachment->images) > 0){
+            $image = $attachment->images[$thumbnail_size];
+            $this->thumbnail = $image->url;
             $this->thumbnail_images = $attachment->images;
         }
+
+        if (!$json_api->include_value('thumbnail')) {
+            unset($this->thumbnail_images);
+        }
+
     }
 
     function set_custom_fields_value() {

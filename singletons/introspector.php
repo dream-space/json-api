@@ -105,6 +105,19 @@ class JSON_API_Introspector {
       return null;
     }
   }
+
+  public function get_sticky_post() {
+      $stickies = get_option('sticky_posts');
+      return $stickies;
+      $posts = $this->get_posts(array(
+          'p' => 1, 'p' => 23,
+      ), true);
+      if (!empty($posts)) {
+          return $posts[0];
+      } else {
+          return null;
+      }
+  }
   
   public function get_current_category() {
     global $json_api;
@@ -332,6 +345,11 @@ class JSON_API_Introspector {
     
     if ($json_api->query->post_type) {
       $query['post_type'] = $json_api->query->post_type;
+    }
+
+    if ($json_api->query->sticky && $json_api->query->sticky == 'true') {
+      $sticky_ids = get_option('sticky_posts');
+      $query['post__in'] = $sticky_ids;
     }
     
     if (!empty($query)) {
