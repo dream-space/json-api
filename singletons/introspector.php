@@ -349,6 +349,7 @@ class JSON_API_Introspector {
 
     if ($json_api->query->sticky && $json_api->query->sticky == 'true') {
       $sticky_ids = get_option('sticky_posts');
+      array_push($sticky_ids, 0);
       $query['post__in'] = $sticky_ids;
     }
     
