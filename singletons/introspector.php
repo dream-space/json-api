@@ -229,7 +229,7 @@ class JSON_API_Introspector {
       WHERE comment_post_ID = %d
         AND comment_approved = 1
         AND ( comment_type = '' OR comment_type = 'comment' )  
-      ORDER BY comment_date
+      ORDER BY comment_post_ID DESC
     ", $post_id));
     $comments = array();
     foreach ($wp_comments as $wp_comment) {

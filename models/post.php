@@ -256,6 +256,11 @@ class JSON_API_Post {
         }
 
         if (!$json_api->include_value('thumbnail')) {
+            unset($this->thumbnail);
+            unset($this->thumbnail_size);
+        }
+
+        if (!$json_api->include_value('thumbnail_images')) {
             unset($this->thumbnail_images);
         }
 
