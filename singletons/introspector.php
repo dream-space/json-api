@@ -105,19 +105,6 @@ class JSON_API_Introspector {
       return null;
     }
   }
-
-  public function get_sticky_post() {
-      $stickies = get_option('sticky_posts');
-      return $stickies;
-      $posts = $this->get_posts(array(
-          'p' => 1, 'p' => 23,
-      ), true);
-      if (!empty($posts)) {
-          return $posts[0];
-      } else {
-          return null;
-      }
-  }
   
   public function get_current_category() {
     global $json_api;
@@ -347,12 +334,32 @@ class JSON_API_Introspector {
       $query['post_type'] = $json_api->query->post_type;
     }
 
-    if ($json_api->query->sticky && $json_api->query->sticky == 'true') {
-      $sticky_ids = get_option('sticky_posts');
-      array_push($sticky_ids, 0);
-      $query['post__in'] = $sticky_ids;
+    $post_in    = array();
+    $post_not_in = array();
+    if ($json_api->query->include_ids) {
+        $post_in = explode(',', $json_api->query->include_ids);
     }
-    
+
+    // check sticky flag
+    if ($json_api->query->sticky && $json_api->query->sticky == 'true') {
+        $sticky_ids = get_option('sticky_posts');
+        if(count($sticky_ids) == 0) array_push($sticky_ids, 0);
+        array_push($post_in, $sticky_ids);
+    }
+
+    if ($json_api->query->exclude_ids) {
+        $post_not_in = explode(',', $json_api->query->exclude_ids);
+        //$post_in = array_diff($post_not_in, $post_in);
+    }
+
+    if(count($post_in) > 0){
+      $query['post__in'] = $post_in;
+    }
+
+    if(count($post_not_in) > 0){
+      $query['post__not_in'] = $post_not_in;
+    }
+
     if (!empty($query)) {
       query_posts($query);
       do_action('json_api_query', $wp_query);
