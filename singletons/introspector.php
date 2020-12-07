@@ -345,6 +345,7 @@ class JSON_API_Introspector {
         $sticky_ids = get_option('sticky_posts');
         if(count($sticky_ids) == 0) array_push($sticky_ids, 0);
         array_push($post_in, $sticky_ids);
+        $query['ignore_sticky_posts'] = false;
     }
 
     if ($json_api->query->exclude_ids) {
