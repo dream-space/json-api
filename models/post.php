@@ -323,7 +323,7 @@ class JSON_API_Post {
                 return 'post-thumbnail';
             }
         }
-        return 'thumbnail';
+        return 'full';
     }
 
 }
