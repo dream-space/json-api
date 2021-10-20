@@ -168,6 +168,10 @@ class JSON_API_Post {
             $content = get_the_content($json_api->query->read_more);
             $content = apply_filters('the_content', $content);
             $content = str_replace(']]>', ']]&gt;', $content);
+            if (strpos($content, 'data-layzr') !== false) {
+                $content = str_replace('src=', 'src-data=', $content);
+                $content = str_replace('data-layzr=', 'src=', $content);
+            }
             $this->content = $content;
         } else {
             unset($this->content);
@@ -255,6 +259,15 @@ class JSON_API_Post {
             $this->thumbnail_images = $attachment->images;
         }
 
+        // attachment value
+        // TODO : find image inside attachment when thumbnail null
+        if($this->thumbnail == null){
+            $attachments = $json_api->introspector->get_attachments($this->id);
+            if($attachments != null && count($attachments) > 0){
+                $this->thumbnail = $attachments[0]->url;
+            }
+        }
+
         if (!$json_api->include_value('thumbnail')) {
             unset($this->thumbnail);
             unset($this->thumbnail_size);
@@ -263,7 +276,6 @@ class JSON_API_Post {
         if (!$json_api->include_value('thumbnail_images')) {
             unset($this->thumbnail_images);
         }
-
     }
 
     function set_custom_fields_value() {
