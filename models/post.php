@@ -26,7 +26,7 @@ class JSON_API_Post {
     var $thumbnail;       // String
     var $custom_fields;   // Object (included by using custom_fields query var)
 
-    function JSON_API_Post($wp_post = null) {
+    function __construct($wp_post = null) {
         if (!empty($wp_post)) {
             $this->import_wp_object($wp_post);
         }
@@ -288,11 +288,33 @@ class JSON_API_Post {
             }
             foreach ($wp_custom_fields as $key => $value) {
                 if ($json_api->query->custom_fields) {
-                    if (in_array($key, $keys)) {
+                    $field = $wp_custom_fields[$key];
+                    if(is_array($field)) {
+                        foreach ($field as $value) {
+                            $serialized = $this->is_serialized($value);
+                            if($serialized){
+                                $this->custom_fields->$key = unserialize($value);
+                            } else {
+                                $this->custom_fields->$key = $value;
+                            }
+                        }
+                    } else {
                         $this->custom_fields->$key = $wp_custom_fields[$key];
                     }
                 } else if (substr($key, 0, 1) != '_') {
-                    $this->custom_fields->$key = $wp_custom_fields[$key];
+                    $field = $wp_custom_fields[$key];
+                    if(is_array($field)) {
+                        foreach ($field as $value) {
+                            $serialized = $this->is_serialized($value);
+                            if($serialized){
+                                $this->custom_fields->$key = unserialize($value);
+                            } else {
+                                $this->custom_fields->$key = $value;
+                            }
+                        }
+                    } else {
+                        $this->custom_fields->$key = $wp_custom_fields[$key];
+                    }
                 }
             }
         } else {
@@ -336,6 +358,32 @@ class JSON_API_Post {
             }
         }
         return 'full';
+    }
+
+    function is_serialized($data) {
+        // Check if it's a string and has at least the minimum length of serialized data (e.g., 'i:0;')
+        if (!is_string($data) || strlen($data) < 4) {
+            return false;
+        }
+    
+        // Trim whitespace for safety
+        $data = trim($data);
+    
+        // Serialized data must start with one of these letters followed by a colon
+        if ($data[1] !== ':') {
+            return false;
+        }
+    
+        // Check if it starts with the typical serialized markers
+        $startChar = $data[0];
+        if ($startChar !== 's' && $startChar !== 'a' && $startChar !== 'O' && $startChar !== 'i' && $startChar !== 'b' && $startChar !== 'd') {
+            return false;
+        }
+    
+        // Try to unserialize and check for errors
+        $result = @unserialize($data);
+    
+        return $result !== false || $data === 'b:0;';
     }
 
 }
